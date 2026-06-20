@@ -174,8 +174,36 @@ public class Model extends Observable {
      * 1. There is at least one empty space on the board.
      * 2. There are two adjacent tiles with the same value.
      */
+
+    // A supplementary function for atLeastOneMoveExists(Board b):
+    private static boolean SameNumberAroundExists(Board b, int x, int y){
+        int[] x_delta = {-1, 0, 0, 1};
+        int[] y_delta = {0, 1, -1, 0};
+        for (int i = 0; i < 4; i++){
+            if ((x + x_delta[i] < 0 || x + x_delta[i] > 3) || (y + y_delta[i] < 0 || y + y_delta[i] > 3)){
+                continue;
+            }
+            if (b.tile(x + x_delta[i],y + y_delta[i]).value() == b.tile(x, y).value()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if(emptySpaceExists(b)){
+            return true;
+        }
+        for(int i = 0; i < b.size(); i++){
+            for (int j = 0; j < b.size(); j++){
+                if (SameNumberAroundExists(b,i,j)){
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
