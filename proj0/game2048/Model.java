@@ -114,6 +114,48 @@ public class Model extends Observable {
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
 
+
+        board.setViewingPerspective(side);
+
+        for (int col = 0; col < board.size(); col++){
+            boolean[] isMerged = {false,false,false,false};
+
+            for (int row = board.size() - 2; row >= 0 ; row--){
+                if (board.tile(col, row) == null)   {continue;}
+
+                for (int above_r = row + 1; above_r < board.size(); above_r++){
+
+                    if ((board.tile(col, above_r) == null))  {
+                        if (above_r == board.size() - 1){
+                            board.move(col, above_r, board.tile(col, row));
+                            changed = true;
+                        }
+                        continue;
+                    }
+
+                    if ((board.tile(col, above_r) != null) && (isMerged[above_r] || (board.tile(col,above_r).value() != board.tile(col,row).value()) ) ){
+                        if(board.tile(col, above_r - 1) == null) {
+                            board.move(col, above_r - 1, board.tile(col,row));
+                            changed = true;
+                        }
+                        break;
+                    }
+                    if ((board.tile(col, above_r) != null) && (board.tile(col,above_r).value() == board.tile(col,row).value()) && !isMerged[above_r]){
+                        board.move(col,above_r,board.tile(col,row));
+                        changed = true;
+                        isMerged[above_r] = true;
+                        score += board.tile(col,above_r).value();
+                        break;
+                    }
+
+                }
+            }
+
+        }
+
+
+        board.setViewingPerspective(Side.NORTH);
+
         checkGameOver();
         if (changed) {
             setChanged();
@@ -180,7 +222,7 @@ public class Model extends Observable {
         int[] x_delta = {-1, 0, 0, 1};
         int[] y_delta = {0, 1, -1, 0};
         for (int i = 0; i < 4; i++){
-            if ((x + x_delta[i] < 0 || x + x_delta[i] > 3) || (y + y_delta[i] < 0 || y + y_delta[i] > 3)){
+            if ((x + x_delta[i] < 0 || x + x_delta[i] > b.size() - 1) || (y + y_delta[i] < 0 || y + y_delta[i] > b.size() - 1)){
                 continue;
             }
             if (b.tile(x + x_delta[i],y + y_delta[i]).value() == b.tile(x, y).value()){
@@ -190,12 +232,12 @@ public class Model extends Observable {
         return false;
     }
 
-
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
         if(emptySpaceExists(b)){
             return true;
         }
+
         for(int i = 0; i < b.size(); i++){
             for (int j = 0; j < b.size(); j++){
                 if (SameNumberAroundExists(b,i,j)){
