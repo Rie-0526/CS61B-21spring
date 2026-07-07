@@ -33,7 +33,29 @@ public class LLDmytest {
         lld1.printDeque();
     }
 
-//    public void main(){
-//        comprehensiveTest();
-//    }
+    @Test
+    public void getFunctionTest(){
+        LinkedListDeque<Double> lld1 = new LinkedListDeque(1.0);
+        lld1.addFirst(0.5);
+        lld1.addLast(2.0);
+        lld1.addFirst(0.0);
+        lld1.printDeque();
+
+        System.out.println(lld1.get(0));
+        System.out.println(lld1.get(3));
+
+    }
+
+    @Test
+    public void getRecursiveFunctionTest(){
+        LinkedListDeque<Double> lld1 = new LinkedListDeque(1.0);
+        lld1.addFirst(0.5);
+        lld1.addLast(2.0);
+        lld1.addFirst(0.0);
+        lld1.printDeque();
+
+        System.out.println(lld1.getRecursive(0));
+        System.out.println(lld1.getRecursive(3));
+
+    }
 }
