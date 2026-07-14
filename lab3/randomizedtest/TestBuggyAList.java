@@ -29,7 +29,7 @@ public class TestBuggyAList {
 
         int N = 500;
         for (int i = 0; i < N; i += 1) {
-            int operationNumber = StdRandom.uniform(0, 2);
+            int operationNumber = StdRandom.uniform(0, 4);
             if (operationNumber == 0) {
                 // addLast
                 int randVal = StdRandom.uniform(0, 100);
@@ -39,6 +39,16 @@ public class TestBuggyAList {
                 // size
                 int size = L.size();
                 System.out.println("size: " + size);
+            } else if (operationNumber == 2) {
+                //getLast
+                if(L.size() == 0)   continue;
+                int num = L.getLast();
+                System.out.println("last number: " + num);
+            } else if (operationNumber == 3) {
+                //removeLast
+                if(L.size() == 0)   continue;
+                int num = L.removeLast();
+                System.out.println("remove: " + num);
             }
         }
     }
