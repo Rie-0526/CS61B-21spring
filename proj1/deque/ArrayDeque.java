@@ -2,6 +2,7 @@ package deque;
 
 public class ArrayDeque<T> {
 
+    // 规定：当size == 0时，firstIndex == lastIndex
     int size = 0;
     int firstIndex = 0;
     int lastIndex = 0;
@@ -86,6 +87,11 @@ public class ArrayDeque<T> {
     }
 
     public void printDeque(){
+        if (size == 0)  {
+            System.out.println();
+            return;
+        }
+
         if (firstIndex <= lastIndex){
             for(int i = firstIndex; i <= lastIndex; i++){
                 System.out.println(array[i]);
@@ -104,15 +110,55 @@ public class ArrayDeque<T> {
     public T removeFirst(){
         if (size == 0)  {return null;}
 
-        return null;
+        T removeValue = array[firstIndex];
+        array[firstIndex] = null;
+        size--;
+
+        if (size > 1){
+            firstIndex++;
+            if (firstIndex > array.length - 1) {
+                firstIndex = 0;
+            }
+        }
+
+        if (size < array.length / 4){
+            resizeArray(array.length / 4);
+        }
+
+        return removeValue;
     }
 
     public T removeLast(){
-        return null;
+        if (size == 0)  {return null;}
+
+        T removeValue = array[lastIndex];
+        array[lastIndex] = null;
+        size--;
+
+        if (size > 1){
+            lastIndex--;
+            if (lastIndex < 0) {
+                lastIndex = array.length - 1;
+            }
+        }
+
+        if (size < array.length / 4){
+            resizeArray(array.length / 4);
+        }
+
+        return removeValue;
     }
 
     public T get(int index){
-        return null;
+
+        if (index >= size)  {return null;}
+
+        int realIndex = index + firstIndex;
+        if (realIndex >= array.length){
+            realIndex -= array.length;
+        }
+        return array[realIndex];
+
     }
 
 
