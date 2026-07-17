@@ -124,6 +124,22 @@ public class ArrayDequeTest {
     }
 
     @Test
+    public void Add_Remove_add() {
+        ArrayDeque<Integer> ad = new ArrayDeque<>();
+        for (int i = 4, j = i + 1; i > 0; i--, j++){
+            ad.addFirst(i);
+            ad.addLast(j);
+        }
+        ad.printDeque();
+        System.out.println();
+        for (int i = 8; i > 0; i--){
+            System.out.println(ad.removeFirst());
+        }
+        ad.printDeque();
+    }
+
+
+    @Test
     public void getTest(){
         ArrayDeque<Integer> ad = new ArrayDeque<>();
         for (int i = 10, j = i + 1; i > 0; i--, j++){

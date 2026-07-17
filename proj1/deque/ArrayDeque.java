@@ -112,7 +112,6 @@ public class ArrayDeque<T> {
 
         T removeValue = array[firstIndex];
         array[firstIndex] = null;
-        size--;
 
         if (size > 1){
             firstIndex++;
@@ -120,6 +119,8 @@ public class ArrayDeque<T> {
                 firstIndex = 0;
             }
         }
+
+        size--;
 
         if (size < array.length / 4){
             resizeArray(array.length / 4);
@@ -133,7 +134,6 @@ public class ArrayDeque<T> {
 
         T removeValue = array[lastIndex];
         array[lastIndex] = null;
-        size--;
 
         if (size > 1){
             lastIndex--;
@@ -141,6 +141,8 @@ public class ArrayDeque<T> {
                 lastIndex = array.length - 1;
             }
         }
+
+        size--;
 
         if (size < array.length / 4){
             resizeArray(array.length / 4);
