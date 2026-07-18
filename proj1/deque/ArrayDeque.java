@@ -1,6 +1,6 @@
 package deque;
 
-public class ArrayDeque<T> {
+public class ArrayDeque<T> implements Deque<T> {
 
     // 规定：当size == 0时，firstIndex == lastIndex
     int size = 0;
@@ -46,6 +46,7 @@ public class ArrayDeque<T> {
     }
 
 
+    @Override
     public void addFirst(T item){
         if(size == array.length){
             resizeArray(size * 2);
@@ -60,6 +61,7 @@ public class ArrayDeque<T> {
         size++;
     }
 
+    @Override
     public void addLast(T item){
         if(size == array.length){
             resizeArray(size * 2);
@@ -77,15 +79,13 @@ public class ArrayDeque<T> {
     // 感觉最好写一个firstIndex/lastIndex增加/减少方法
     // 你这不纯迭代器的超级无敌劣质low版本
 
-    public boolean isEmpty(){
-        if (size == 0)  return true;
-        else return false;
-    }
 
+    @Override
     public int size(){
         return size;
     }
 
+    @Override
     public void printDeque(){
         if (size == 0)  {
             System.out.println();
@@ -107,6 +107,7 @@ public class ArrayDeque<T> {
         }
     }
 
+    @Override
     public T removeFirst(){
         if (size == 0)  {return null;}
 
@@ -129,6 +130,7 @@ public class ArrayDeque<T> {
         return removeValue;
     }
 
+    @Override
     public T removeLast(){
         if (size == 0)  {return null;}
 
@@ -151,6 +153,7 @@ public class ArrayDeque<T> {
         return removeValue;
     }
 
+    @Override
     public T get(int index){
 
         if (index >= size)  {return null;}
