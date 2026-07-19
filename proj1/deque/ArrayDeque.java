@@ -27,6 +27,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     public class ArrayDequeIterator<T> implements Iterator<T> {
 
         int ptr = firstIndex;
+        int nextTimes = 0;
 
         @Override
         public boolean hasNext(){
@@ -37,7 +38,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
                     return false;
             }
             else if (firstIndex > lastIndex) {
-                if (ptr > lastIndex && ptr < firstIndex)
+                if ((ptr > lastIndex && ptr < firstIndex) || nextTimes == size)
                     return false;
                 else
                     return true;
@@ -53,6 +54,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             if (ptr == array.length) {
                 ptr = 0;
             }
+            nextTimes++;
             return value;
         }
     }
@@ -103,7 +105,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public void addFirst(T item){
-        if(size == array.length - 1){
+        if(size == array.length){
             resizeArray(size * 2);
         }
         if (size != 0){
@@ -118,7 +120,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public void addLast(T item){
-        if(size == array.length - 1){
+        if(size == array.length){
             resizeArray(size * 2);
         }
         if (size != 0) {

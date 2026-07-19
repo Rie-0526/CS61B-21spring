@@ -150,14 +150,14 @@ public class ArrayDequeTest {
         System.out.println();
 
         System.out.println(ad.get(1));
-        System.out.println(ad.get(19));
+        System.out.println(ad.get(ad.size() - 1));
         System.out.println(ad.get(30));
     }
 
     @Test
     public void IteratorTest() {
         ArrayDeque<Integer> ad = new ArrayDeque<>();
-        for (int i = 10, j = i + 1; i > 0; i--, j++){
+        for (int i = 4, j = i + 1; i > 0; i--, j++){
             ad.addFirst(i);
             ad.addLast(j);
         }
