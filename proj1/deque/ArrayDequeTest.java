@@ -154,4 +154,19 @@ public class ArrayDequeTest {
         System.out.println(ad.get(30));
     }
 
+    @Test
+    public void IteratorTest() {
+        ArrayDeque<Integer> ad = new ArrayDeque<>();
+        for (int i = 10, j = i + 1; i > 0; i--, j++){
+            ad.addFirst(i);
+            ad.addLast(j);
+        }
+        ad.printDeque();
+        System.out.println();
+
+        for (int w : ad) {
+            System.out.println(w);
+        }
+    }
+
 }

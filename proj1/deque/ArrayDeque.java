@@ -1,6 +1,8 @@
 package deque;
 
-public class ArrayDeque<T> implements Deque<T> {
+import java.util.Iterator;
+
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     // 规定：当size == 0时，firstIndex == lastIndex
     int size = 0;
@@ -15,6 +17,59 @@ public class ArrayDeque<T> implements Deque<T> {
 
     public ArrayDeque(T item){
         addLast(item);
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return new ArrayDequeIterator();
+    }
+
+    public class ArrayDequeIterator<T> implements Iterator<T> {
+
+        int ptr = firstIndex;
+
+        @Override
+        public boolean hasNext(){
+            if (firstIndex < lastIndex){
+                if (ptr + 1 <= lastIndex)
+                    return true;
+                else
+                    return false;
+            }
+            else if (firstIndex > lastIndex) {
+                if (ptr > lastIndex && ptr < firstIndex)
+                    return false;
+                else
+                    return true;
+            }
+            return false;
+        }
+
+        @Override
+        public T next() {
+            T value = (T) array[ptr];
+            if (!hasNext()) return value;
+            ptr++;
+            if (ptr == array.length) {
+                ptr = 0;
+            }
+            return value;
+        }
+    }
+
+    @Override
+    public boolean equals(Object o){
+
+        if(!(o instanceof ArrayDeque))  return false;
+
+        ArrayDeque<T> other = (ArrayDeque<T>) o;
+
+        if(size() != other.size())  return false;
+        for(int i = 0; i < size; i++) {
+            if (get(i) != other.get(i)) return false;
+        }
+
+        return true;
     }
 
 
@@ -48,7 +103,7 @@ public class ArrayDeque<T> implements Deque<T> {
 
     @Override
     public void addFirst(T item){
-        if(size == array.length){
+        if(size == array.length - 1){
             resizeArray(size * 2);
         }
         if (size != 0){
@@ -63,7 +118,7 @@ public class ArrayDeque<T> implements Deque<T> {
 
     @Override
     public void addLast(T item){
-        if(size == array.length){
+        if(size == array.length - 1){
             resizeArray(size * 2);
         }
         if (size != 0) {
