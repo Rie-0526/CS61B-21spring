@@ -58,4 +58,19 @@ public class LLDmytest {
         System.out.println(lld1.getRecursive(3));
 
     }
+
+    @Test
+    public void IteratorTest() {
+        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+        for (int i = 4, j = i + 1; i > 0; i--, j++){
+            lld.addFirst(i);
+            lld.addLast(j);
+        }
+        lld.printDeque();
+        System.out.println();
+
+        for (int w : lld) {
+            System.out.println(w);
+        }
+    }
 }
