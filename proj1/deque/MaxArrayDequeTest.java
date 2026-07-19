@@ -2,7 +2,18 @@ package deque;
 
 import org.junit.Test;
 
+import java.util.Comparator;
+
 public class MaxArrayDequeTest {
+
+    public class maxIntComparator implements Comparator<Integer> {
+        @Override
+        public int compare(Integer o1, Integer o2){
+            return o1 - o2;
+        }
+    }
+
+
     @Test
     public void initTest(){
         maxIntComparator c = new maxIntComparator();
