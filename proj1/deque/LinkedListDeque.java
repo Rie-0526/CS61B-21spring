@@ -2,7 +2,7 @@ package deque;
 
 import java.util.Iterator;
 
-public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
+public class LinkedListDeque<T> implements Deque<T> {
     private int size;
     private Node sentinel = new Node(null);
 
@@ -61,7 +61,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         Iterator<T> ptr1 = iterator();
         Iterator<T> ptr2 = other.iterator();
         while (ptr1.hasNext()) {
-            if (ptr1.next() != ptr2.next()) return false;
+            if (!(ptr1.next().equals(ptr2.next()))) return false;
         }
 
         return true;
