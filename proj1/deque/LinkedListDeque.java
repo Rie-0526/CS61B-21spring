@@ -29,8 +29,44 @@ public class LinkedListDeque<T> implements Deque<T> {
     }
 
     public Iterator<T> iterator() {
-        return null;
+        return new LLDIterator<T>();
     }
+
+    public class LLDIterator<T> implements Iterator<T> {
+
+        Node ptr = sentinel.next;
+
+        @Override
+        public boolean hasNext() {
+            if (ptr != null) return true;
+            return false;
+        }
+
+        @Override
+        public T next() {
+            T value = (T) ptr.item;
+            if(hasNext()) {
+                ptr = ptr.next;
+            }
+            return value;
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof LinkedListDeque))    return false;
+        LinkedListDeque<T> other = (LinkedListDeque<T>) o;
+        if (other.size() != size())     return false;
+
+        Iterator<T> ptr1 = iterator();
+        Iterator<T> ptr2 = other.iterator();
+        while (ptr1.hasNext()) {
+            if (ptr1.next() != ptr2.next()) return false;
+        }
+
+        return true;
+    }
+
 
     @Override
     public void addFirst(T item){
