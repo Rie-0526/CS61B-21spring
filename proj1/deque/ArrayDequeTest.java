@@ -1,6 +1,8 @@
 package deque;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 // 你们不要再看这个测试了，这个测试，这个测试
 // 全是我写的。。
 
@@ -167,6 +169,51 @@ public class ArrayDequeTest {
         for (int w : ad) {
             System.out.println(w);
         }
+    }
+
+    @Test
+    public void AD_DeepEqualsTest() {
+        ArrayDeque<Integer> ad = new ArrayDeque<>();
+        for (int i = 4, j = i + 1; i > 0; i--, j++){
+            ad.addFirst(i);
+            ad.addLast(j);
+        }
+
+        assertEquals(true, ad.equals(ad));
+    }
+
+    @Test
+    public void ADs_EqualsTest() {
+        ArrayDeque<Integer> ad1 = new ArrayDeque<>();
+        for (int i = 4, j = i + 1; i > 0; i--, j++){
+            ad1.addFirst(i);
+            ad1.addLast(j);
+        }
+
+        ArrayDeque<Integer> ad2 = new ArrayDeque<>();
+        for (int i = 4, j = i + 1; i > 0; i--, j++){
+            ad2.addFirst(i);
+            ad2.addLast(j);
+        }
+
+        assertEquals(true, ad1.equals(ad2));
+    }
+
+    @Test
+    public void AD_LLD_EqualsTest() {
+        ArrayDeque<Integer> ad = new ArrayDeque<>();
+        for (int i = 4, j = i + 1; i > 0; i--, j++){
+            ad.addFirst(i);
+            ad.addLast(j);
+        }
+
+        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+        for (int i = 4, j = i + 1; i > 0; i--, j++){
+            lld.addFirst(i);
+            lld.addLast(j);
+        }
+
+        assertEquals(true, ad.equals(lld));
     }
 
 }
