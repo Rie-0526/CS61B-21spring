@@ -2,7 +2,7 @@ package deque;
 
 import java.util.Iterator;
 
-public class ArrayDeque<T> implements Deque<T> {
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     // 规定：当size == 0时，firstIndex == lastIndex
     private int size = 0;
@@ -66,10 +66,8 @@ public class ArrayDeque<T> implements Deque<T> {
         Deque<T> other = (Deque<T>) o;
         if (size() != other.size())     return false;
 
-        Iterator<T> ptr1 = iterator();
-        Iterator<T> ptr2 = other.iterator();
-        while (ptr1.hasNext()) {
-            if (!(ptr1.next().equals(ptr2.next()))) return false;
+        for(int i = 0; i < size(); i++) {
+            if (get(i) != other.get(i)) return false;
         }
 
         return true;
