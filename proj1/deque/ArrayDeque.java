@@ -5,11 +5,11 @@ import java.util.Iterator;
 public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     // 规定：当size == 0时，firstIndex == lastIndex
-    int size = 0;
-    int firstIndex = 0;
-    int lastIndex = 0;
+    private int size = 0;
+    private int firstIndex = 0;
+    private int lastIndex = 0;
 
-    T[] array = (T[]) new Object[8];
+    private T[] array = (T[]) new Object[8];
 
 
     public ArrayDeque(){
@@ -24,7 +24,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         return new ArrayDequeIterator();
     }
 
-    public class ArrayDequeIterator<T> implements Iterator<T> {
+    private class ArrayDequeIterator<T> implements Iterator<T> {
 
         int ptr = firstIndex;
         int nextTimes = 0;
