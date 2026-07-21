@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import static capers.Utils.*;
 
-import static capers.Dog.DOG_FOLDER;
 
 /** A repository for Capers 
  * @author TODO
@@ -22,7 +21,9 @@ public class CapersRepository {
     static final File CWD = new File(System.getProperty("user.dir"));
 
     /** Main metadata folder. */
-    static final File CAPERS_FOLDER = join("capers", ".capers"); // TODO Hint: look at the `join`
+
+    // 寄在这里了，没有意识到要加CWD
+    static final File CAPERS_FOLDER = join(CWD,".capers"); // TODO Hint: look at the `join`
                                             //      function in Utils
 
     /**
@@ -37,10 +38,9 @@ public class CapersRepository {
     public static void setupPersistence() throws IOException {
         // TODO
         CAPERS_FOLDER.mkdir();
-        DOG_FOLDER.mkdir();
+        Dog.DOG_FOLDER.mkdir();
         File story = join(CAPERS_FOLDER, "story");
         story.createNewFile();
-
     }
 
     /**
@@ -64,7 +64,7 @@ public class CapersRepository {
     public static void makeDog(String name, String breed, int age) throws IOException {
         // TODO
         Dog newDog = new Dog(name, breed, age);
-        File dog = join(DOG_FOLDER, name);
+        File dog = join(Dog.DOG_FOLDER, name);
         dog.createNewFile();
         newDog.saveDog();
         System.out.println(newDog);
