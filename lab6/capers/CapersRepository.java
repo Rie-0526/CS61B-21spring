@@ -64,8 +64,8 @@ public class CapersRepository {
     public static void makeDog(String name, String breed, int age) throws IOException {
         // TODO
         Dog newDog = new Dog(name, breed, age);
-        File nD = join(DOG_FOLDER + name);
-        nD.createNewFile();
+        File dog = join(DOG_FOLDER, name);
+        dog.createNewFile();
         newDog.saveDog();
         System.out.println(newDog);
     }
@@ -80,5 +80,6 @@ public class CapersRepository {
         // TODO
         Dog oldDog = Dog.fromFile(name);
         oldDog.haveBirthday();
+        oldDog.saveDog();
     }
 }
