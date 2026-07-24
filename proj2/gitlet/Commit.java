@@ -29,10 +29,10 @@ public class Commit implements Serializable {
     private Instant time;
 
     /** The hash value(commit file name) of parents of this Commit. */
-    private ArrayList<String> parents;
+    private ArrayList<String> parents = null;
 
     /** The map of file names to blob references */
-    private HashMap<String, String> fileMap;
+    private HashMap<String, String> fileMap = null;
 
     /* TODO: fill in the rest of this class. */
     public void setMessage(String text){

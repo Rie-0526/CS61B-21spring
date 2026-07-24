@@ -28,21 +28,21 @@ public class Repository {
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
     /** The object directory. */
-    public static final File OBJECT_DIR = join(CWD, "object");
+    public static final File OBJECT_DIR = join(GITLET_DIR, "object");
     /** The commits directory. */
-    public static final File COMMITS_DIR = join(CWD, "commits");
+    public static final File COMMITS_DIR = join(GITLET_DIR, "commits");
     /** The storing area directory */
-    public static final File STORING_AREA = join(CWD, "storingArea");
+    public static final File STORING_AREA = join(GITLET_DIR, "storingArea");
 
-    public static final File HEAD = join(CWD, "HEAD");
+    public static final File HEAD = join(GITLET_DIR, "HEAD");
     /** The branch directory */
-    public static final File BRANCH = join(CWD, "branch");
+    public static final File BRANCH = join(GITLET_DIR, "branch");
     /** The master file of branch directory */
     public static final File master = join(BRANCH, "master");
 
 
     /* TODO: fill in the rest of this class. */
-    public void setGitletDir() {
+    private static void setGitletDir() {
         GITLET_DIR.mkdir();
         OBJECT_DIR.mkdir();
         COMMITS_DIR.mkdir();
@@ -50,16 +50,13 @@ public class Repository {
         BRANCH.mkdir();
     }
 
-
-
-    public void init() throws IOException {
+    public static void init() throws IOException {
 
         Commit initialCommit = new Commit();
         initialCommit.setMessage("initial commit");
         initialCommit.setEpochTime();
-        initialCommit.setParents(null);
 
-        String ICfileName = sha1(initialCommit);
+        String ICfileName = sha1(serialize(initialCommit));
         File ICfile = join(COMMITS_DIR, ICfileName);
 
 
