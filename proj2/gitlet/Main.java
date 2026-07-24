@@ -20,6 +20,8 @@ public class Main {
                 break;
             case "add":
                 // TODO: handle the `add [filename]` command
+                String filename = args[1];
+                Repository.add(filename);
                 break;
             // TODO: FILL THE REST IN
         }

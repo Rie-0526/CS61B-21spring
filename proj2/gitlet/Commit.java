@@ -29,12 +29,15 @@ public class Commit implements Serializable {
     private Instant time;
 
     /** The hash value(commit file name) of parents of this Commit. */
-    private ArrayList<String> parents = null;
+    private ArrayList<String> parents = new ArrayList<>();;
 
     /** The map of file names to blob references */
-    private HashMap<String, String> fileMap = null;
+    private HashMap<String, String> fileMap = new HashMap<>();
 
     /* TODO: fill in the rest of this class. */
+
+    public Commit() {};
+
     public void setMessage(String text){
         message = text;
     }
@@ -47,10 +50,21 @@ public class Commit implements Serializable {
         time = Instant.ofEpochSecond(0);
     }
 
-    public void setParents(ArrayList<String> p){
-        for (String i : p) {
-            parents.add(i);
-        }
+    // p is a hash value of parent commit.
+    public void addParents(String p){
+        parents.add(p);
+    }
+
+    private void addFile(String fileName, String hashValue){
+        fileMap.put(fileName,hashValue);
+    }
+
+    public String getHashValue(String fileName) {
+        return fileMap.get(fileName);
+    }
+
+    public boolean containFilename(String filename) {
+        return fileMap.containsKey(filename);
     }
 
 

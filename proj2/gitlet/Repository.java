@@ -33,6 +33,7 @@ public class Repository {
     public static final File COMMITS_DIR = join(GITLET_DIR, "commits");
     /** The storing area directory */
     public static final File STORING_AREA = join(GITLET_DIR, "storingArea");
+    public static final File SA_OBJECTS = join(STORING_AREA, "objects");
 
     public static final File HEAD = join(GITLET_DIR, "HEAD");
     /** The branch directory */
@@ -42,11 +43,13 @@ public class Repository {
 
 
     /* TODO: fill in the rest of this class. */
+
     private static void setGitletDir() {
         GITLET_DIR.mkdir();
         OBJECT_DIR.mkdir();
         COMMITS_DIR.mkdir();
         STORING_AREA.mkdir();
+        SA_OBJECTS.mkdir();
         BRANCH.mkdir();
     }
 
@@ -74,6 +77,64 @@ public class Repository {
         Utils.writeContents(HEAD, master.getPath());
 
     }
+
+
+    public static void add(String filename) throws IOException {
+
+        // Search for the mapping of stage area.
+        Stage stageMap;
+        File stageMapFile = join(STORING_AREA, "stageMap");
+        if (stageMapFile.exists()){
+            stageMap = readObject(stageMapFile, Stage.class);
+        }
+        else {
+            stageMapFile.createNewFile();
+            stageMap = new Stage();
+        }
+
+        // Search for last Commit.
+        String currentBranchPath = Utils.readContentsAsString(HEAD);
+        File currentBranch = new File(currentBranchPath);
+        String lastCommitName = Utils.readContentsAsString(currentBranch);
+        File lastCommitFile = join(COMMITS_DIR, lastCommitName);
+        Commit lastCommit = readObject(lastCommitFile, Commit.class);
+
+        // Search for the contents of the file (of workspace).
+        File workspaceFile = new File(filename);
+        String fileContent = Utils.readContentsAsString(workspaceFile);
+        // Compute the hash value of the file passed in.
+        String fileHashValue = sha1(serialize(fileContent));
+
+        // Search for the file in storing area.
+        File storingAreaFile = join(SA_OBJECTS, filename);
+
+        if (lastCommit.containFilename(filename)){  // 文件已被commit追踪
+            if (fileHashValue == lastCommit.getHashValue(filename)){    //文件内容相对lc未更改：移除已存在映射，移除暂存区文件
+                stageMap.removeFile(filename);
+                storingAreaFile.delete();
+            }
+//            else {  // 文件内容相对lc已更改
+//                //1.之前暂存区里有
+//                //2.之前暂存区里没有
+//                stageMap.addFile(filename,fileHashValue);
+//                storingAreaFile.createNewFile();
+//                Utils.writeContents(storingAreaFile, fileContent);
+//            }
+        }
+        else {  //文件未被commit追踪（即添加/更改文件）: 在映射中添加/更改映射，在暂存区添加/更改文件
+
+            stageMap.addFile(filename, fileHashValue);
+
+            storingAreaFile.createNewFile();
+            Utils.writeContents(storingAreaFile, fileContent);
+
+        }
+
+        Utils.writeObject(stageMapFile, stageMap);  // 记得保存stageMap的更改
+
+    }
+
+
 
 
 }
