@@ -42,6 +42,12 @@ public class Repository {
     public static final File master = join(BRANCH, "master");
 
 
+
+
+
+    public static final String[] FILE_STATUS = {"New","Delete"};
+
+
     /* TODO: fill in the rest of this class. */
 
     private static void setGitletDir() {
@@ -79,17 +85,19 @@ public class Repository {
     }
 
 
+
+
     public static void add(String filename) throws IOException {
 
         // Search for the mapping of stage area.
-        Stage stageMap;
+        StageMap stageMap;
         File stageMapFile = join(STORING_AREA, "stageMap");
         if (stageMapFile.exists()){
-            stageMap = readObject(stageMapFile, Stage.class);
+            stageMap = readObject(stageMapFile, StageMap.class);
         }
         else {
             stageMapFile.createNewFile();
-            stageMap = new Stage();
+            stageMap = new StageMap();
         }
 
         // Search for last Commit.
@@ -99,14 +107,33 @@ public class Repository {
         File lastCommitFile = join(COMMITS_DIR, lastCommitName);
         Commit lastCommit = readObject(lastCommitFile, Commit.class);
 
+        // Search for the file in storing area.
+        File storingAreaFile = join(SA_OBJECTS, filename);
+
+
         // Search for the contents of the file (of workspace).
         File workspaceFile = new File(filename);
+
+        if (!workspaceFile.exists()) {
+            if (lastCommit.containFilename(filename)){    // 文件相较于lc已消失（即删除）
+                stageMap.modifyFile(filename,"Delete");
+                storingAreaFile.delete();
+            } else if (stageMap.containFilename(filename)) {
+                stageMap.removeFile(filename);
+                storingAreaFile.delete();
+            } else {
+                System.out.println(filename + " doesn't exist!");
+            }
+            Utils.writeObject(stageMapFile, stageMap);
+            System.exit(0);
+        }
+
+
         String fileContent = Utils.readContentsAsString(workspaceFile);
         // Compute the hash value of the file passed in.
         String fileHashValue = sha1(serialize(fileContent));
 
-        // Search for the file in storing area.
-        File storingAreaFile = join(SA_OBJECTS, filename);
+
 
         if (lastCommit.containFilename(filename)){  // 文件已被commit追踪
             if (fileHashValue == lastCommit.getHashValue(filename)){    //文件内容相对lc未更改：移除已存在映射，移除暂存区文件
@@ -123,7 +150,7 @@ public class Repository {
         }
         else {  //文件未被commit追踪（即添加/更改文件）: 在映射中添加/更改映射，在暂存区添加/更改文件
 
-            stageMap.addFile(filename, fileHashValue);
+            stageMap.modifyFile(filename, FILE_STATUS[0]);
 
             storingAreaFile.createNewFile();
             Utils.writeContents(storingAreaFile, fileContent);
