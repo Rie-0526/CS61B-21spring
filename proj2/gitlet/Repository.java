@@ -60,6 +60,7 @@ public class Repository {
         BRANCH.mkdir();
     }
 
+
     public static void init() throws IOException {
 
         Commit initialCommit = new Commit();
@@ -90,6 +91,11 @@ public class Repository {
         return join(STORING_AREA, "stageMap");
     }
 
+    private static StageMap getStageMapObject() {
+        File stageMapFile = join(STORING_AREA, "stageMap");
+        return Utils.readObject(stageMapFile, StageMap.class);
+    }
+
     /** Return a Commit object of last commit. */
     private static Commit getLastCommit(){
         // Search for last Commit.
@@ -109,6 +115,7 @@ public class Repository {
         String lastCommitName = Utils.readContentsAsString(currentBranch);
         return lastCommitName;
     }
+
 
     public static void add(String filename) throws IOException {
 
@@ -133,10 +140,10 @@ public class Repository {
 
         if (!workspaceFile.exists()) {
             if (lastCommit.containFilename(filename)){    // 文件相较于lc已消失（即删除）
-                stageMap.modifyFile(filename,STATUS_DELETE);
+                stageMap.newMapping(filename,STATUS_DELETE);
                 storingAreaFile.delete();
             } else if (stageMap.containFilename(filename)) {
-                stageMap.removeFile(filename);
+                stageMap.removeMapping(filename);
                 storingAreaFile.delete();
             } else {
                 System.out.println(filename + " doesn't exist!");
@@ -153,7 +160,7 @@ public class Repository {
 
         if (lastCommit.containFilename(filename)){  // 文件已被commit追踪
             if (fileHashValue == lastCommit.getHashValue(filename)){    //文件内容相对lc未更改：移除已存在映射，移除暂存区文件
-                stageMap.removeFile(filename);
+                stageMap.removeMapping(filename);
                 storingAreaFile.delete();
             }
 //            else {  // 文件内容相对lc已更改
@@ -166,7 +173,7 @@ public class Repository {
         }
         else {  //文件未被commit追踪（即添加/更改文件）: 在映射中添加/更改映射，在暂存区添加/更改文件
 
-            stageMap.modifyFile(filename, STATUS_NEW);
+            stageMap.newMapping(filename, STATUS_NEW);
 
             storingAreaFile.createNewFile();
             Utils.writeContents(storingAreaFile, fileContent);
@@ -175,11 +182,6 @@ public class Repository {
 
         Utils.writeObject(stageMapFile, stageMap);  // 记得保存stageMap的更改
 
-    }
-
-    private static StageMap getStageMapObject() {
-        File stageMapFile = join(STORING_AREA, "stageMap");
-        return Utils.readObject(stageMapFile, StageMap.class);
     }
 
 
@@ -204,12 +206,16 @@ public class Repository {
 
                stagingAreaFile.delete();
 
-               newCommit.renewMapping(filename,fileHashValue);
+               newCommit.newMapping(filename,fileHashValue);
             }
             else if (status.equals(STATUS_DELETE)) {
-                newCommit.deleteMapping(filename);
+                newCommit.removeMapping(filename);
             }
         }
+
+        //删除暂存区的stagemap
+        File stageMapFile = getStageMapFile();
+        stageMapFile.delete();
 
         // 修改父提交
         newCommit.resetParents(getLastCommitName());
@@ -229,6 +235,40 @@ public class Repository {
         File newCommitFile = join(COMMITS_DIR,newCommitHashValue);
         newCommitFile.createNewFile();
         Utils.writeObject(newCommitFile,newCommit);
+
+    }
+
+
+    public static void rm(String filename) {
+
+        File stageMapFile = getStageMapFile();  //对stageMap文件修改时使用
+        File workspaceFile = new File(filename);
+        File storingAreaFile = join(SA_OBJECTS, filename);
+
+        StageMap stageMap = getStageMapObject();
+        Commit lastCommit = getLastCommit();
+
+
+        if ((!stageMap.containFilename(filename)) &&
+                !lastCommit.containFilename(filename)) {
+            System.out.println("No reason to remove the file.");
+        }
+        else {
+
+            if (stageMap.containFilename(filename)) {       //文件在暂存区里
+                stageMap.removeMapping(filename);
+                storingAreaFile.delete();
+            }
+
+            if (lastCommit.containFilename(filename)){    // 文件被lc跟踪
+                stageMap.newMapping(filename,STATUS_DELETE);
+                workspaceFile.delete();
+            }
+
+            Utils.writeObject(stageMapFile, stageMap);  // 记得保存stageMap的更改
+
+        }
+
 
     }
 

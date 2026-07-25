@@ -60,8 +60,8 @@ public class Commit implements Serializable {
     }
 
 
-    /** Add or modify the mapping of existed file. */
-    public void renewMapping(String fileName, String hashValue){
+    /** Add a mapping of file or modify the mapping of existed file. */
+    public void newMapping(String fileName, String hashValue){
         fileMap.put(fileName,hashValue);
     }
 
@@ -70,7 +70,7 @@ public class Commit implements Serializable {
 //        fileMap.put(fileName,hashValue);
 //    }
 
-    public void deleteMapping(String filename) {
+    public void removeMapping(String filename) {
         fileMap.remove(filename);
     }
 

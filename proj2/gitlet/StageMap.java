@@ -13,7 +13,8 @@ public class StageMap implements Serializable {
         fileStatus = new HashMap<>();
     }
 
-    public void modifyFile(String fileName, String status){
+    /** Add a mapping of file or modify the mapping of existed file. */
+    public void newMapping(String fileName, String status){
         fileStatus.put(fileName,status);
     }
 
@@ -25,7 +26,7 @@ public class StageMap implements Serializable {
         return fileStatus.containsKey(filename);
     }
 
-    public String removeFile(String fileName) {
+    public String removeMapping(String fileName) {
         return fileStatus.remove(fileName);
     }
 
