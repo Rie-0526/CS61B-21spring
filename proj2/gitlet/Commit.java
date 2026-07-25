@@ -51,12 +51,27 @@ public class Commit implements Serializable {
     }
 
     // p is a hash value of parent commit.
+    public void resetParents(String p) {
+        parents.clear();
+        parents.add(p);
+    }
     public void addParents(String p){
         parents.add(p);
     }
 
-    private void addFile(String fileName, String hashValue){
+
+    /** Add or modify the mapping of existed file. */
+    public void renewMapping(String fileName, String hashValue){
         fileMap.put(fileName,hashValue);
+    }
+
+//    public void modifyMapping(String fileName, String hashValue){
+//        /* add Or Modify Mapping Of Existed File */
+//        fileMap.put(fileName,hashValue);
+//    }
+
+    public void deleteMapping(String filename) {
+        fileMap.remove(filename);
     }
 
     public String getHashValue(String fileName) {

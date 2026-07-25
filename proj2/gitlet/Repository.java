@@ -44,8 +44,9 @@ public class Repository {
 
 
 
+    public static String STATUS_DELETE = "delete";
+    public static String STATUS_NEW = "new";
 
-    public static final String[] FILE_STATUS = {"New","Delete"};
 
 
     /* TODO: fill in the rest of this class. */
@@ -85,13 +86,35 @@ public class Repository {
     }
 
 
+    private static File getStageMapFile(){
+        return join(STORING_AREA, "stageMap");
+    }
 
+    /** Return a Commit object of last commit. */
+    private static Commit getLastCommit(){
+        // Search for last Commit.
+        String currentBranchPath = Utils.readContentsAsString(HEAD);
+        File currentBranch = new File(currentBranchPath);
+        String lastCommitName = Utils.readContentsAsString(currentBranch);
+        File lastCommitFile = join(COMMITS_DIR, lastCommitName);
+        Commit lastCommit = readObject(lastCommitFile, Commit.class);
+        return lastCommit;
+
+    }
+
+    /** Return a hash value as string as the name of last commit. */
+    private static String getLastCommitName(){
+        String currentBranchPath = Utils.readContentsAsString(HEAD);
+        File currentBranch = new File(currentBranchPath);
+        String lastCommitName = Utils.readContentsAsString(currentBranch);
+        return lastCommitName;
+    }
 
     public static void add(String filename) throws IOException {
 
         // Search for the mapping of stage area.
         StageMap stageMap;
-        File stageMapFile = join(STORING_AREA, "stageMap");
+        File stageMapFile = getStageMapFile();
         if (stageMapFile.exists()){
             stageMap = readObject(stageMapFile, StageMap.class);
         }
@@ -100,23 +123,17 @@ public class Repository {
             stageMap = new StageMap();
         }
 
-        // Search for last Commit.
-        String currentBranchPath = Utils.readContentsAsString(HEAD);
-        File currentBranch = new File(currentBranchPath);
-        String lastCommitName = Utils.readContentsAsString(currentBranch);
-        File lastCommitFile = join(COMMITS_DIR, lastCommitName);
-        Commit lastCommit = readObject(lastCommitFile, Commit.class);
+        Commit lastCommit = getLastCommit();
 
         // Search for the file in storing area.
         File storingAreaFile = join(SA_OBJECTS, filename);
-
 
         // Search for the contents of the file (of workspace).
         File workspaceFile = new File(filename);
 
         if (!workspaceFile.exists()) {
             if (lastCommit.containFilename(filename)){    // 文件相较于lc已消失（即删除）
-                stageMap.modifyFile(filename,"Delete");
+                stageMap.modifyFile(filename,STATUS_DELETE);
                 storingAreaFile.delete();
             } else if (stageMap.containFilename(filename)) {
                 stageMap.removeFile(filename);
@@ -134,7 +151,6 @@ public class Repository {
         String fileHashValue = sha1(serialize(fileContent));
 
 
-
         if (lastCommit.containFilename(filename)){  // 文件已被commit追踪
             if (fileHashValue == lastCommit.getHashValue(filename)){    //文件内容相对lc未更改：移除已存在映射，移除暂存区文件
                 stageMap.removeFile(filename);
@@ -150,7 +166,7 @@ public class Repository {
         }
         else {  //文件未被commit追踪（即添加/更改文件）: 在映射中添加/更改映射，在暂存区添加/更改文件
 
-            stageMap.modifyFile(filename, FILE_STATUS[0]);
+            stageMap.modifyFile(filename, STATUS_NEW);
 
             storingAreaFile.createNewFile();
             Utils.writeContents(storingAreaFile, fileContent);
@@ -158,6 +174,61 @@ public class Repository {
         }
 
         Utils.writeObject(stageMapFile, stageMap);  // 记得保存stageMap的更改
+
+    }
+
+    private static StageMap getStageMapObject() {
+        File stageMapFile = join(STORING_AREA, "stageMap");
+        return Utils.readObject(stageMapFile, StageMap.class);
+    }
+
+
+    public static void commit(String message) throws IOException {
+        StageMap stageMap = getStageMapObject();
+        Commit newCommit = getLastCommit();
+
+        /* 合并last commit和暂存区： */
+        for(String filename : stageMap.getFilenameSet()) {
+            String status = stageMap.getStatus(filename);
+            if (status.equals(STATUS_NEW)) {
+                // 把暂存区文件迁移到objects：
+                // 读取暂存区文件，在objects创建名字为hash的副本，暂存区文件删除
+                // 并更新commit映射
+               File stagingAreaFile = join(SA_OBJECTS, filename);
+               String fileContent = Utils.readContentsAsString(stagingAreaFile);
+               String fileHashValue = Utils.sha1(fileContent);
+
+               File commitAreaFile = join(OBJECT_DIR,fileHashValue);
+               commitAreaFile.createNewFile();
+               Utils.writeContents(commitAreaFile, fileContent);
+
+               stagingAreaFile.delete();
+
+               newCommit.renewMapping(filename,fileHashValue);
+            }
+            else if (status.equals(STATUS_DELETE)) {
+                newCommit.deleteMapping(filename);
+            }
+        }
+
+        // 修改父提交
+        newCommit.resetParents(getLastCommitName());
+
+        //修改时间戳
+        newCommit.setNowTime();
+
+        //修改提交信息
+        newCommit.setMessage(message);
+
+
+        /* 存储new commit */
+        // 获取commit的哈希值作为文件名
+        String newCommitHashValue = sha1(serialize(newCommit));
+
+        //在commits文件夹里新建commit哈希名文件
+        File newCommitFile = join(COMMITS_DIR,newCommitHashValue);
+        newCommitFile.createNewFile();
+        Utils.writeObject(newCommitFile,newCommit);
 
     }
 

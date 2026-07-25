@@ -2,6 +2,7 @@ package gitlet;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Set;
 
 public class StageMap implements Serializable {
 
@@ -26,6 +27,10 @@ public class StageMap implements Serializable {
 
     public String removeFile(String fileName) {
         return fileStatus.remove(fileName);
+    }
+
+    public Set<String> getFilenameSet() {
+        return fileStatus.keySet();
     }
 
 

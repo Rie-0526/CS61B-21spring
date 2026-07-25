@@ -24,6 +24,10 @@ public class Main {
                 Repository.add(filename);
                 break;
             // TODO: FILL THE REST IN
+            case "commit":
+                String message = args[1];
+                Repository.commit(message);
+                break;
         }
     }
 }
