@@ -82,7 +82,38 @@ public class Commit implements Serializable {
         return fileMap.containsKey(filename);
     }
 
+    public String getName() {
+        return Utils.sha1(Utils.serialize(this));
+    }
 
+    public Instant getTime() {
+        return time;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getParent(int i) {
+        if (parents.size() <= i) return null;
+        return parents.get(i);
+    }
+
+    public void print(){
+        System.out.println("===");
+        System.out.println("commit " + getName());
+
+        if (parents.size() > 1) {
+            System.out.print("Merge:");
+            for (String p : parents) {
+                System.out.print(' ' + p.substring(0, 7));
+            }
+            System.out.println();
+        }
+
+        System.out.println("Date: " + getTime());
+        System.out.println(getMessage());
+    }
 
 
 

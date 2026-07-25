@@ -275,4 +275,25 @@ public class Repository {
 
 
 
+    public static void log(){
+
+        Commit curCommit = getLastCommit();
+        String parentName = curCommit.getParent(0);
+
+        while (parentName != null) {
+
+            curCommit.print();
+
+            File parentCommitFile = join(COMMITS_DIR, parentName);
+            curCommit = Utils.readObject(parentCommitFile, Commit.class);
+            parentName = curCommit.getParent(0);
+        }
+
+        curCommit.print();
+
+
+    }
+
+
+
 }

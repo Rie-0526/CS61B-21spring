@@ -32,6 +32,9 @@ public class Main {
                 String filename = args[1];
                 Repository.rm(filename);
             } break;
+            case "log": {
+                Repository.log();
+            } break;
         }
     }
 }
