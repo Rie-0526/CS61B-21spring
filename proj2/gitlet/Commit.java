@@ -113,6 +113,11 @@ public class Commit implements Serializable {
 
         System.out.println("Date: " + getTime());
         System.out.println(getMessage());
+
+        //额外功能： 打印映射
+        for (String filename : fileMap.keySet()) {
+            System.out.println(filename + ": " + fileMap.get(filename));
+        }
     }
 
 

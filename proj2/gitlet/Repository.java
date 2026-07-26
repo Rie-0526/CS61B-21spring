@@ -116,6 +116,10 @@ public class Repository {
         return lastCommitName;
     }
 
+    private static File getCurrentBranch() {
+        String currentBranchPath = Utils.readContentsAsString(HEAD);
+        return new File(currentBranchPath);
+    }
 
     public static void add(String filename) throws IOException {
 
@@ -158,11 +162,13 @@ public class Repository {
         String fileHashValue = sha1(serialize(fileContent));
 
 
-        if (lastCommit.containFilename(filename)){  // 文件已被commit追踪
-            if (fileHashValue == lastCommit.getHashValue(filename)){    //文件内容相对lc未更改：移除已存在映射，移除暂存区文件
-                stageMap.removeMapping(filename);
-                storingAreaFile.delete();
-            }
+        if (lastCommit.containFilename(filename)
+            && fileHashValue.equals(lastCommit.getHashValue(filename))) {
+                // 文件已被commit追踪
+                // 且文件内容相对lc未更改：移除已存在映射，移除暂存区文件
+            stageMap.removeMapping(filename);
+            storingAreaFile.delete();
+
 //            else {  // 文件内容相对lc已更改
 //                //1.之前暂存区里有
 //                //2.之前暂存区里没有
@@ -171,7 +177,8 @@ public class Repository {
 //                Utils.writeContents(storingAreaFile, fileContent);
 //            }
         }
-        else {  //文件未被commit追踪（即添加/更改文件）: 在映射中添加/更改映射，在暂存区添加/更改文件
+        else {  //文件相较于last commit被添加/更改:
+            // 在映射中添加/更改映射，在暂存区添加/更改文件
 
             stageMap.newMapping(filename, STATUS_NEW);
 
@@ -189,7 +196,7 @@ public class Repository {
         StageMap stageMap = getStageMapObject();
         Commit newCommit = getLastCommit();
 
-        /* 合并last commit和暂存区： */
+        /* 合并last commit和暂存区的映射 和 暂存区文件迁移： */
         for(String filename : stageMap.getFilenameSet()) {
             String status = stageMap.getStatus(filename);
             if (status.equals(STATUS_NEW)) {
@@ -236,6 +243,10 @@ public class Repository {
         newCommitFile.createNewFile();
         Utils.writeObject(newCommitFile,newCommit);
 
+        /* 更改当前分支指针 */
+        File currentBranch = getCurrentBranch();
+        Utils.writeContents(currentBranch, newCommitHashValue);
+
     }
 
 
@@ -273,8 +284,6 @@ public class Repository {
     }
 
 
-
-
     public static void log(){
 
         Commit curCommit = getLastCommit();
@@ -293,6 +302,8 @@ public class Repository {
 
 
     }
+
+
 
 
 
