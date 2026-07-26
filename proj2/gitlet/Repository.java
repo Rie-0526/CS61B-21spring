@@ -2,6 +2,9 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 import static gitlet.Utils.*;
 
@@ -321,7 +324,7 @@ public class Repository {
 
     public static void find(String message) {
         boolean isFind = false;
-        
+
         for (String commitName : plainFilenamesIn(COMMITS_DIR)) {
             Commit commit = readObjectAsCommit(commitName);
             if (message.equals(commit.getMessage())) {
@@ -334,5 +337,61 @@ public class Repository {
             System.out.println("Found no commit with that message.");
         }
     }
+
+
+    private static void printTitle(String title) {
+        System.out.println("=== " + title + " ===");
+    };
+
+    public static void status() {
+        File currentBranchFile = getCurrentBranch();
+        String currentBranchName = currentBranchFile.getName();
+
+        printTitle("Branches");
+        if (currentBranchName.equals("master"))
+            System.out.print('*');
+        System.out.println("master");
+        for (String branchName : Utils.plainFilenamesIn(BRANCH)) {
+            if (branchName.equals("master"))
+                continue;
+            if (currentBranchName.equals(branchName))
+                System.out.print('*');
+            System.out.println(branchName);
+        }
+        System.out.println();
+
+        printTitle("Staged Files");
+        for (String filename : Utils.plainFilenamesIn(SA_OBJECTS)) {
+            System.out.println(filename);
+        }
+        System.out.println();
+
+
+        printTitle("Removed Files");
+        StageMap stageMap = getStageMapObject();
+        ArrayList<String> filelist = new ArrayList<>();
+
+        for (String filename : stageMap.getFilenameSet()) {
+            if (stageMap.getStatus(filename).equals(STATUS_DELETE)){
+                filelist.add(filename);
+            }
+        }
+
+        Collections.sort(filelist);
+        for (String n : filelist) {
+            System.out.println(n);
+        }
+        System.out.println();
+
+
+        printTitle("Modifications Not Staged For Commit");
+        System.out.println();
+        printTitle("Untracked Files");
+        System.out.println();
+
+
+
+    }
+
 
 }

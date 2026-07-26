@@ -42,6 +42,9 @@ public class Main {
                 String message = args[1];
                 Repository.find(message);
             } break;
+            case "status": {
+                Repository.status();
+            } break;
         }
     }
 }
