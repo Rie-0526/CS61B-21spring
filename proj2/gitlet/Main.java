@@ -38,6 +38,10 @@ public class Main {
             case "global-log": {
                 Repository.globalLog();
             } break;
+            case "find": {
+                String message = args[1];
+                Repository.find(message);
+            } break;
         }
     }
 }

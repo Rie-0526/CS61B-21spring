@@ -319,4 +319,20 @@ public class Repository {
     }
 
 
+    public static void find(String message) {
+        boolean isFind = false;
+        
+        for (String commitName : plainFilenamesIn(COMMITS_DIR)) {
+            Commit commit = readObjectAsCommit(commitName);
+            if (message.equals(commit.getMessage())) {
+                isFind = true;
+                System.out.println(commitName);
+            }
+        }
+
+        if (!isFind) {
+            System.out.println("Found no commit with that message.");
+        }
+    }
+
 }
