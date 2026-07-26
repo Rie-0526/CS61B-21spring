@@ -284,6 +284,13 @@ public class Repository {
     }
 
 
+    /** Read from COMMIT_DIR */
+    private static Commit readObjectAsCommit(String commitName) {
+        File commitFile = join(COMMITS_DIR, commitName);
+        return readObject(commitFile, Commit.class);
+    }
+
+
     public static void log(){
 
         Commit curCommit = getLastCommit();
@@ -304,7 +311,12 @@ public class Repository {
     }
 
 
-
+    public static void globalLog() {
+        for (String commitName : plainFilenamesIn(COMMITS_DIR)) {
+            Commit commit = readObjectAsCommit(commitName);
+            commit.print();
+        }
+    }
 
 
 }
