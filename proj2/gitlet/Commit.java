@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 /** Represents a gitlet commit object.
  *  TODO: It's a good idea to give a description here of what else this Class
@@ -97,6 +98,10 @@ public class Commit implements Serializable {
     public String getParent(int i) {
         if (parents.size() <= i) return null;
         return parents.get(i);
+    }
+
+    public Set<String> getFilenameSet() {
+        return fileMap.keySet();
     }
 
     public void print(){

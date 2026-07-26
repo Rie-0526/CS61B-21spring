@@ -2,9 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 
 import static gitlet.Utils.*;
 
@@ -47,8 +45,9 @@ public class Repository {
 
 
 
-    public static String STATUS_DELETE = "delete";
+    public static String STATUS_DELETE = "deleted";
     public static String STATUS_NEW = "new";
+    public static String STATUS_MODIFY = "modified";
 
 
 
@@ -385,8 +384,107 @@ public class Repository {
 
 
         printTitle("Modifications Not Staged For Commit");
+        Commit lc = getLastCommit();
+        // stageMap 在前面代码块已载入
+        TreeMap<String, String> filesAndStatus = new TreeMap<>();
+        List<String> workspaceFileList = plainFilenamesIn(CWD);
+
+        HashSet<String> fileSet = new HashSet<>();
+        fileSet.addAll(workspaceFileList);
+        fileSet.addAll(lc.getFilenameSet());
+        fileSet.addAll(stageMap.getFilenameSet());
+
+        for (String filename : fileSet) {
+
+            File file = join(CWD, filename);
+            String WSFileHashValue;
+
+
+            /* Tracked in the current commit, changed in the working directory, but not staged; or
+                在当前提交中跟踪，在工作目录中已更改，但未暂存；或
+                Staged for addition, but with different contents than in the working directory; or
+                已暂存以添加，但内容与工作目录中的不同；或
+                Staged for addition, but deleted in the working directory; or
+                已暂存待添加，但在工作目录中被删除；或
+                Not staged for removal, but tracked in the current commit and deleted from the working directory.
+                未暂存以移除，但在当前提交中跟踪且已从工作目录中删除。 */
+
+            if (file.exists()) {
+                WSFileHashValue = sha1(readContentsAsString(file));
+                if (lc.containFilename(filename) && !lc.getHashValue(filename).equals(WSFileHashValue)
+                        && !stageMap.containFilename(filename))
+                {
+                    filesAndStatus.put(filename,STATUS_MODIFY);
+                }
+                // 满足前两项且stagemap里存在非删除状态的映射时，追踪暂存区内容是否不同
+                else if (lc.containFilename(filename) && !lc.getHashValue(filename).equals(WSFileHashValue)
+                        && !stageMap.getStatus(filename).equals(STATUS_DELETE)
+                        && WSFileHashValue.equals(sha1(readContentsAsString(join(SA_OBJECTS,filename)))))
+                {
+                    filesAndStatus.put(filename,STATUS_MODIFY);
+                }
+            }
+            else {
+                /* Staged for addition, but deleted in the working directory; or
+                已暂存待添加，但在工作目录中被删除；或
+                Not staged for removal, but tracked in the current commit and deleted from the working directory.
+                未暂存以移除，但在当前提交中跟踪且已从工作目录中删除。 */
+                if (stageMap.getStatus(filename).equals(STATUS_NEW)) {
+                    filesAndStatus.put(filename,STATUS_DELETE);
+                }
+                else if (lc.containFilename(filename)
+                        && stageMap.getStatus(filename).equals(STATUS_NEW)) {
+                    filesAndStatus.put(filename,STATUS_DELETE);
+                }
+            }
+        }
+
+        for (String filename : filesAndStatus.sequencedKeySet()) {
+            System.out.println(filename);
+        }
+
         System.out.println();
+
+//        for (String filename : lastCommit.getFilenameSet()) {
+//            File file = join(CWD, filename);
+//            //文件在工作区存在
+//            if (file.exists()) {
+//                String fileHashValue = sha1(readContentsAsString(file));
+//                if (!fileHashValue.equals(lastCommit.getHashValue(filename))) { //文件内容和lc中不同
+//                    //暂存区已存储该文件
+//                    if (stageMap.containFilename(filename)){
+//                        File SAfile = join(SA_OBJECTS, filename);
+//                        String SAfileHashValue = sha1(readContentsAsString(SAfile));
+//                        if (!SAfileHashValue.equals(fileHashValue)) {     //暂存区的文件内容与工作区不同
+//                            filesAndStatus.put(filename,STATUS_MODIFY);
+//                        }
+//                    }
+//                    //暂存区没有存储该文件
+//                    else {
+//                        filesAndStatus.put(filename,STATUS_MODIFY);
+//                    }
+//                }
+//            }
+//            // 文件在工作区不存在
+//            else {
+//                if (stageMap.containFilename(filename)){    //如果在暂存区有保存
+//                    if ( !stageMap.getStatus(filename).equals(STATUS_DELETE)) {     //如果没有记录成deleted状态
+//                        filesAndStatus.put(filename,STATUS_DELETE);
+//                    }
+//                }
+//            }
+//        }
+
+
         printTitle("Untracked Files");
+        ArrayList<String> untrackedFileList = new ArrayList<>();
+
+        for (String filename : workspaceFileList) {
+            if (!lc.containFilename(filename) && !stageMap.containFilename(filename)){
+                System.out.println(filename);
+            }
+        }
+
         System.out.println();
 
 
