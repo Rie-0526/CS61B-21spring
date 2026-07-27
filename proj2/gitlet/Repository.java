@@ -542,12 +542,66 @@ public class Repository {
     }
 
 
-    public static void checkoutBranch(String branchname) {
 
+    private static boolean isFileUntracked(String WSfilename) {
+        StageMap stageMap = getStageMapObject();
+        Commit lc = getHeadCommit();
+        return !lc.containFilename(WSfilename)
+                && !STATUS_NEW.equals(stageMap.getStatus(WSfilename));
     }
 
+    private static void clearStoringArea() {
+        getStageMapFile().delete();
+        for (String n : Utils.plainFilenamesIn(SA_OBJECTS)) {
+            join(SA_OBJECTS, n).delete();
+        }
+    }
+
+    public static void checkoutBranch(String branchname) throws IOException {
+        File branchFile = join(BRANCH, branchname);
+        if (!branchFile.exists()) {
+            System.out.println("No such branch exists.");
+            System.exit(0);
+        }
+        else if (branchFile.equals(getCurrentBranch())) {
+            System.out.println("No need to checkout the current branch.");
+            System.exit(0);
+        }
 
 
+        Commit lcOfBranch = getCommit(readContentsAsString(branchFile));
+        for (String filename : lcOfBranch.getFilenameSet()){
+            if (Utils.plainFilenamesIn(CWD).contains(filename) && isFileUntracked(filename)) {
+                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.exit(0);
+            }
+        }
+
+        // 把检出分支的文件放进工作区
+        for (String filename : lcOfBranch.getFilenameSet()) {
+            File blob = join(OBJECT_DIR, lcOfBranch.getHashValue(filename));
+            File WSfile = join(CWD, filename);
+            WSfile.createNewFile();
+            writeContents(WSfile, readContentsAsString(blob));
+
+        }
+
+        // 删除当前分支存在但检出分支不存在的文件
+        for (String filename : getHeadCommit().getFilenameSet()) {
+            if (!lcOfBranch.containFilename(filename)) {
+                join(CWD, filename).delete();
+            }
+        }
+
+
+        // 清空暂存区
+        clearStoringArea();
+
+
+        // 改写头指针
+        writeContents(HEAD, branchFile.getPath());
+
+    }
 
 
     public static void branch(String branchname) throws IOException {
