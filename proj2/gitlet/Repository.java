@@ -98,8 +98,8 @@ public class Repository {
         return Utils.readObject(stageMapFile, StageMap.class);
     }
 
-    /** Return a Commit object of last commit. */
-    private static Commit getLastCommit(){
+    /** Return a Commit object of commit pointed by head pointer. */
+    private static Commit getHeadCommit(){
         // Search for last Commit.
         String currentBranchPath = Utils.readContentsAsString(HEAD);
         File currentBranch = new File(currentBranchPath);
@@ -110,8 +110,8 @@ public class Repository {
 
     }
 
-    /** Return a hash value as string as the name of last commit. */
-    private static String getLastCommitName(){
+    /** Return a string as the hash name of commit pointed by head pointer. */
+    private static String getHeadCommitName(){
         String currentBranchPath = Utils.readContentsAsString(HEAD);
         File currentBranch = new File(currentBranchPath);
         String lastCommitName = Utils.readContentsAsString(currentBranch);
@@ -136,7 +136,7 @@ public class Repository {
             stageMap = new StageMap();
         }
 
-        Commit lastCommit = getLastCommit();
+        Commit lastCommit = getHeadCommit();
 
         // Search for the file in storing area.
         File storingAreaFile = join(SA_OBJECTS, filename);
@@ -196,7 +196,7 @@ public class Repository {
 
     public static void commit(String message) throws IOException {
         StageMap stageMap = getStageMapObject();
-        Commit newCommit = getLastCommit();
+        Commit newCommit = getHeadCommit();
 
         /* 合并last commit和暂存区的映射 和 暂存区文件迁移： */
         for(String filename : stageMap.getFilenameSet()) {
@@ -227,7 +227,7 @@ public class Repository {
         stageMapFile.delete();
 
         // 修改父提交
-        newCommit.resetParents(getLastCommitName());
+        newCommit.resetParents(getHeadCommitName());
 
         //修改时间戳
         newCommit.setNowTime();
@@ -259,7 +259,7 @@ public class Repository {
         File storingAreaFile = join(SA_OBJECTS, filename);
 
         StageMap stageMap = getStageMapObject();
-        Commit lastCommit = getLastCommit();
+        Commit lastCommit = getHeadCommit();
 
 
         if ((!stageMap.containFilename(filename)) &&
@@ -287,15 +287,17 @@ public class Repository {
 
 
     /** Read from COMMIT_DIR */
-    private static Commit readObjectAsCommit(String commitName) {
+    private static Commit getCommit(String commitName) {
         File commitFile = join(COMMITS_DIR, commitName);
+        if (!commitFile.exists())
+            return null;
         return readObject(commitFile, Commit.class);
     }
 
 
     public static void log(){
 
-        Commit curCommit = getLastCommit();
+        Commit curCommit = getHeadCommit();
         String parentName = curCommit.getParent(0);
 
         while (parentName != null) {
@@ -315,7 +317,7 @@ public class Repository {
 
     public static void globalLog() {
         for (String commitName : plainFilenamesIn(COMMITS_DIR)) {
-            Commit commit = readObjectAsCommit(commitName);
+            Commit commit = getCommit(commitName);
             commit.print();
         }
     }
@@ -325,7 +327,7 @@ public class Repository {
         boolean isFind = false;
 
         for (String commitName : plainFilenamesIn(COMMITS_DIR)) {
-            Commit commit = readObjectAsCommit(commitName);
+            Commit commit = getCommit(commitName);
             if (message.equals(commit.getMessage())) {
                 isFind = true;
                 System.out.println(commitName);
@@ -384,17 +386,10 @@ public class Repository {
 
 
         printTitle("Modifications Not Staged For Commit");
-        Commit lc = getLastCommit();
+        Commit lc = getHeadCommit();
         // stageMap 在前面代码块已载入
         TreeMap<String, String> filesAndStatus = new TreeMap<>();
         List<String> workspaceFileList = plainFilenamesIn(CWD);
-
-
-
-
-
-
-
 
 
 //        HashSet<String> fileSet = new HashSet<>();
@@ -507,6 +502,7 @@ public class Repository {
 
         for (String filename : filesAndStatus.sequencedKeySet()) {
             System.out.print(filename);
+            System.out.print(' ');
             System.out.println('(' + filesAndStatus.get(filename) + ')');
         }
 
@@ -515,7 +511,7 @@ public class Repository {
 
         printTitle("Untracked Files");
         for (String filename : workspaceFileList) {
-            if (!lc.containFilename(filename) && !stageMap.getStatus(filename).equals(STATUS_NEW)) {
+            if (!lc.containFilename(filename) && !STATUS_NEW.equals(stageMap.getStatus(filename))) {
                 System.out.println(filename);
             }
         }
@@ -525,5 +521,43 @@ public class Repository {
 
     }
 
+
+    public static void checkout(String filename) {      //不传入commit名字，默认是headcommit
+        checkout(getHeadCommitName(), filename);
+    }
+
+    public static void checkout(String hashID, String filename) {
+        Commit commit = getCommit(hashID);
+        if (commit == null) {
+            System.out.println("No commit with that id exists.");
+            System.exit(0);
+        }
+        if (!commit.containFilename(filename)){
+            System.out.println("File does not exist in that commit.");
+            System.exit(0);
+        }
+        File blob = join(OBJECT_DIR, commit.getHashValue(filename));
+        File WSfile = join(CWD,filename);
+        writeContents(WSfile, readContentsAsString(blob));
+    }
+
+
+    public static void checkoutBranch(String branchname) {
+
+    }
+
+
+
+
+
+    public static void branch(String branchname) throws IOException {
+        File newbranchFile = join(BRANCH, branchname);
+        if (newbranchFile.exists()) {
+            System.out.println("A branch with that name already exists.");
+            System.exit(0);
+        }
+        newbranchFile.createNewFile();
+        writeContents(newbranchFile, getHeadCommitName());
+    }
 
 }

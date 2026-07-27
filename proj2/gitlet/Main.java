@@ -45,6 +45,27 @@ public class Main {
             case "status": {
                 Repository.status();
             } break;
+            case "branch": {
+                String branchname = args[1];
+                Repository.branch(branchname);
+            } break;
+            case "checkout": {
+                switch (args.length) {
+                    case 3:{
+                        String filename = args[2];
+                        Repository.checkout(filename);
+                    }break;
+                    case 4:{
+                        String hashID = args[1];
+                        String filename = args[3];
+                        Repository.checkout(hashID, filename);
+                    }break;
+                    case 2:{
+                        String branchname = args[1];
+                        Repository.checkoutBranch(branchname);
+                    }break;
+                }
+            } break;
         }
     }
 }
