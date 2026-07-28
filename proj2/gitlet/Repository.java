@@ -111,8 +111,7 @@ public class Repository {
         File currentBranch = new File(currentBranchPath);
         String lastCommitName = Utils.readContentsAsString(currentBranch);
         File lastCommitFile = join(COMMITS_DIR, lastCommitName);
-        Commit lastCommit = readObject(lastCommitFile, Commit.class);
-        return lastCommit;
+        return readObject(lastCommitFile, Commit.class);
 
     }
 
@@ -144,17 +143,21 @@ public class Repository {
         File workspaceFile = new File(filename);
 
         if (!workspaceFile.exists()) {
-            if (lastCommit.containFilename(filename)){    // 文件相较于lc已消失（即删除）
-                stageMap.newMapping(filename,STATUS_DELETE);
-                storingAreaFile.delete();
-            } else if (stageMap.containFilename(filename)) {
-                stageMap.removeMapping(filename);
-                storingAreaFile.delete();
-            } else {
-                System.out.println(filename + " doesn't exist!");
-            }
-            Utils.writeObject(stageMapFile, stageMap);
+
+            System.out.println("File does not exist.");
             System.exit(0);
+//            if (lastCommit.containFilename(filename)){    // 文件相较于lc已消失（即删除）
+//                stageMap.newMapping(filename,STATUS_DELETE);
+//                storingAreaFile.delete();
+//            } else if (stageMap.containFilename(filename)) {
+//                stageMap.removeMapping(filename);
+//                storingAreaFile.delete();
+//            } else {
+//                System.out.println(filename + " doesn't exist!");
+//            }
+//            Utils.writeObject(stageMapFile, stageMap);
+//            System.exit(0);
+
         }
 
 
@@ -196,6 +199,11 @@ public class Repository {
     public static void commit(String message) throws IOException {
         StageMap stageMap = getStageMapObject();
         Commit newCommit = getHeadCommit();
+
+        if (stageMap.isEmpty()){
+            System.out.println("No changes added to the commit.");
+            System.exit(0);
+        }
 
         /* 合并last commit和暂存区的映射 和 暂存区文件迁移： */
         for(String filename : stageMap.getFilenameSet()) {

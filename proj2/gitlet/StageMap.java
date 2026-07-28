@@ -38,5 +38,9 @@ public class StageMap implements Serializable {
         fileStatus.clear();
     }
 
+    public boolean isEmpty() {
+        return fileStatus.isEmpty();
+    }
+
 
 }

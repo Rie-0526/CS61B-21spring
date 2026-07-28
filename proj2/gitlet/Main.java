@@ -25,6 +25,10 @@ public class Main {
             } break;
             // TODO: FILL THE REST IN
             case "commit": {
+                if (args.length == 1)   {
+                    System.out.println("Please enter a commit message.");
+                    System.exit(0);
+                }
                 String message = args[1];
                 Repository.commit(message);
             } break;
