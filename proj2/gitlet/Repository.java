@@ -40,7 +40,9 @@ public class Repository {
     /** The branch directory */
     public static final File BRANCH = join(GITLET_DIR, "branch");
     /** The master file of branch directory */
-    public static final File master = join(BRANCH, "master");
+    public static final File MASTER = join(BRANCH, "master");
+
+    public static final File STAGE_MAP_FILE = join(STORING_AREA, "stageMap");
 
 
 
@@ -73,29 +75,33 @@ public class Repository {
         File ICfile = join(COMMITS_DIR, ICfileName);
 
 
-        if(ICfile.exists() && HEAD.exists() && master.exists()) {
+        if(ICfile.exists() && HEAD.exists() && MASTER.exists()) {
             System.out.println("A Gitlet version-control system already exists in the current directory.");
             System.exit(0);
         }
 
         setGitletDir();
+
         ICfile.createNewFile();
         Utils.writeObject(ICfile, initialCommit);
-        master.createNewFile();
-        Utils.writeContents(master, ICfileName);
+        MASTER.createNewFile();
+        Utils.writeContents(MASTER, ICfileName);
         HEAD.createNewFile();
-        Utils.writeContents(HEAD, master.getPath());
+        Utils.writeContents(HEAD, MASTER.getPath());
+        STAGE_MAP_FILE.createNewFile();
+        Utils.writeObject(STAGE_MAP_FILE, new StageMap());
+
+
 
     }
 
 
     private static File getStageMapFile(){
-        return join(STORING_AREA, "stageMap");
+        return STAGE_MAP_FILE;
     }
 
     private static StageMap getStageMapObject() {
-        File stageMapFile = join(STORING_AREA, "stageMap");
-        return Utils.readObject(stageMapFile, StageMap.class);
+        return Utils.readObject(STAGE_MAP_FILE, StageMap.class);
     }
 
     /** Return a Commit object of commit pointed by head pointer. */
@@ -126,15 +132,8 @@ public class Repository {
     public static void add(String filename) throws IOException {
 
         // Search for the mapping of stage area.
-        StageMap stageMap;
         File stageMapFile = getStageMapFile();
-        if (stageMapFile.exists()){
-            stageMap = readObject(stageMapFile, StageMap.class);
-        }
-        else {
-            stageMapFile.createNewFile();
-            stageMap = new StageMap();
-        }
+        StageMap stageMap = getStageMapObject();
 
         Commit lastCommit = getHeadCommit();
 
@@ -205,15 +204,15 @@ public class Repository {
                 // 把暂存区文件迁移到objects：
                 // 读取暂存区文件，在objects创建名字为hash的副本，暂存区文件删除
                 // 并更新commit映射
-               File stagingAreaFile = join(SA_OBJECTS, filename);
-               String fileContent = Utils.readContentsAsString(stagingAreaFile);
+               File storingAreaFile = join(SA_OBJECTS, filename);
+               String fileContent = Utils.readContentsAsString(storingAreaFile);
                String fileHashValue = Utils.sha1(fileContent);
 
                File commitAreaFile = join(OBJECT_DIR,fileHashValue);
                commitAreaFile.createNewFile();
                Utils.writeContents(commitAreaFile, fileContent);
 
-               stagingAreaFile.delete();
+               storingAreaFile.delete();
 
                newCommit.newMapping(filename,fileHashValue);
             }
@@ -222,9 +221,9 @@ public class Repository {
             }
         }
 
-        //删除暂存区的stagemap
-        File stageMapFile = getStageMapFile();
-        stageMapFile.delete();
+        //把暂存区的stagemap清空
+        stageMap.clear();
+        writeObject(getStageMapFile(), stageMap);
 
         // 修改父提交
         newCommit.resetParents(getHeadCommitName());
@@ -542,7 +541,6 @@ public class Repository {
     }
 
 
-
     private static boolean isFileUntracked(String WSfilename) {
         StageMap stageMap = getStageMapObject();
         Commit lc = getHeadCommit();
@@ -551,7 +549,7 @@ public class Repository {
     }
 
     private static void clearStoringArea() {
-        getStageMapFile().delete();
+        writeObject(getStageMapFile(), new StageMap());
         for (String n : Utils.plainFilenamesIn(SA_OBJECTS)) {
             join(SA_OBJECTS, n).delete();
         }

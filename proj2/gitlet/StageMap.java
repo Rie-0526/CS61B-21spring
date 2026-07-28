@@ -34,5 +34,9 @@ public class StageMap implements Serializable {
         return fileStatus.keySet();
     }
 
+    public void clear() {
+        fileStatus.clear();
+    }
+
 
 }
