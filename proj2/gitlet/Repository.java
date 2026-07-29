@@ -670,15 +670,34 @@ public class Repository {
             System.exit(0);
         }
 
-        Commit curBranch = getHeadCommit();
-        Commit lcOfGivingBranch = getLCofBranch(branchname);
-        Commit latestCommonAncestor =
+        Commit curCommit = getHeadCommit();
+        Commit givingCommit = getLCofBranch(branchname);
+        Commit ancestor =
                 findLatestCommonAncestor(readContentsAsString(branchFile), getHeadCommitName());
 
+        if (ancestor.equals(givingCommit)) {
+            System.out.println("Given branch is an ancestor of the current branch.");
+            System.exit(0);
+        }
+        else if (ancestor.equals(curCommit)) {
+            System.out.println("Current branch fast-forwarded.");
+            System.exit(0);
+        }
 
+        HashSet<String> filenameSet = new HashSet<>();
+        filenameSet.addAll(givingCommit.getFilenameSet());
+        filenameSet.addAll(curCommit.getFilenameSet());
 
-
-        for (String filename : lcOfGivingBranch.getFilenameSet()) {
+        for (String filename : filenameSet) {
+            String hashInCurrent;
+            String hashInGiving;
+            String hashInAncestor;
+            if (curCommit.containFilename(filename))
+                hashInCurrent = curCommit.getHashValue(filename);
+            if (givingCommit.containFilename(filename))
+                hashInGiving = ancestor.getHashValue(filename);
+            if (ancestor.containFilename(filename))
+                hashInAncestor = ancestor.getHashValue(filename);
 
 
 
