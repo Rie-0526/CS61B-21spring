@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static gitlet.Utils.*;
+import static gitlet.Utils.readContentsAsString;
 
 // TODO: any imports you need here
 
@@ -563,6 +564,24 @@ public class Repository {
         }
     }
 
+
+    /** 相对于当前提交，工作区中是否有未跟踪文件*/
+    private static boolean isHavingUntrackFileInWorkspace (){
+        for (String filename : getHeadCommit().getFilenameSet()){
+            if (Utils.plainFilenamesIn(CWD).contains(filename) && isFileUntracked(filename)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private static boolean isBranchExist(String branchname) {
+        File branchFile = join(BRANCH, branchname);
+        return branchFile.exists();
+    }
+
+
     public static void checkoutBranch(String branchname) throws IOException {
         File branchFile = join(BRANCH, branchname);
         if (!branchFile.exists()) {
@@ -575,14 +594,13 @@ public class Repository {
         }
 
 
-        Commit lcOfBranch = getCommit(readContentsAsString(branchFile));
-        for (String filename : lcOfBranch.getFilenameSet()){
-            if (Utils.plainFilenamesIn(CWD).contains(filename) && isFileUntracked(filename)) {
-                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
-                System.exit(0);
-            }
+        if (isHavingUntrackFileInWorkspace()) {
+            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            System.exit(0);
         }
 
+
+        Commit lcOfBranch = getCommit(readContentsAsString(branchFile));
         // 把检出分支的文件放进工作区
         for (String filename : lcOfBranch.getFilenameSet()) {
             File blob = join(OBJECT_DIR, lcOfBranch.getHashValue(filename));
@@ -618,6 +636,85 @@ public class Repository {
         }
         newbranchFile.createNewFile();
         writeContents(newbranchFile, getHeadCommitName());
+    }
+
+
+
+
+    private static Commit getLCofBranch(String branchname) {
+        File branchFile = join(BRANCH, branchname);
+        if (!branchFile.exists())   return null;
+        return getCommit(readContentsAsString(branchFile));
+    }
+
+
+    public static void merge(String branchname) {
+
+        File branchFile = join(BRANCH, branchname);
+        if (!branchFile.exists()) {
+            System.out.println("A branch with that name does not exist.");
+            System.exit(0);
+        }
+        else if (branchFile.equals(getCurrentBranch())) {
+            System.out.println("Cannot merge a branch with itself.");
+            System.exit(0);
+        }
+
+        if (!getStageMapObject().isEmpty()) {
+            System.out.println("You have uncommitted changes.");
+            System.exit(0);
+        }
+
+        if (isHavingUntrackFileInWorkspace()) {
+            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            System.exit(0);
+        }
+
+        Commit curBranch = getHeadCommit();
+        Commit lcOfGivingBranch = getLCofBranch(branchname);
+        Commit latestCommonAncestor =
+                findLatestCommonAncestor(readContentsAsString(branchFile), getHeadCommitName());
+
+
+
+
+        for (String filename : lcOfGivingBranch.getFilenameSet()) {
+
+
+
+        }
+
+
+
+
+    }
+
+    private static void addFileToSA(String filename, File file) throws IOException {
+        StageMap stageMap = getStageMapObject();
+        stageMap.newMapping(filename, STATUS_NEW);
+        File storingAreaFile = join(SA_OBJECTS, filename);
+
+        storingAreaFile.createNewFile();
+        Utils.writeContents(storingAreaFile, readContentsAsString(file));
+        Utils.writeObject(STAGE_MAP_FILE, stageMap);  // 记得保存stageMap的更改
+
+    }
+
+
+    private static Commit findLatestCommonAncestor(String commit1_name, String commit2_name) {
+
+        Commit commit1 = getCommit(commit1_name);
+
+        while (commit1.getParent(0) != null) {
+            Commit commit2 = getCommit(commit2_name);
+            while (commit2.getParent(0) != null) {
+                if (commit2.equals(commit1))
+                    return commit2;
+                commit2 = getCommit(commit2.getParent(0));
+            }
+        }
+        return commit1;
+
     }
 
 }

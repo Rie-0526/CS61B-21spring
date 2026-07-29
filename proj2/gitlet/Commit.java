@@ -95,6 +95,14 @@ public class Commit implements Serializable {
         return message;
     }
 
+    public ArrayList getParents() {
+        return parents;
+    }
+
+    public HashMap getFileMap() {
+        return fileMap;
+    }
+
     public String getParent(int i) {
         if (parents.size() <= i) return null;
         return parents.get(i);
@@ -124,6 +132,15 @@ public class Commit implements Serializable {
             System.out.println(filename + ": " + fileMap.get(filename));
         }
     }
+
+    @Override
+    public boolean equals(Object commit) {
+        Commit other = (Commit) commit;
+        return time.equals(other.getTime()) && parents.equals(other.getParents())
+                && message.equals(getMessage()) && fileMap.equals(other.getFileMap());
+    }
+
+
 
 
 
